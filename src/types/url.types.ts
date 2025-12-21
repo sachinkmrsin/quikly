@@ -4,7 +4,7 @@ export interface CreateUrlDto {
   expiresIn?: number;
 }
 
-export interface BulkCreateDto {
+export interface BulkCreateUrlDto {
   urls: string[];
 }
 

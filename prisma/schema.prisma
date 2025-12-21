@@ -22,6 +22,7 @@ model Url {
   clickCount     Int       @default(0) @map("click_count")
   lastAccessedAt DateTime? @map("last_accessed_at")
 
+  @@index([expiresAt])
   @@index([shortCode])
   @@index([createdAt])
   @@map("urls")

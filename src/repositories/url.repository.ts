@@ -2,7 +2,7 @@ import { prisma } from "../libs/prisma";
 import type { Url } from "../../generated/prisma/client";
 export interface CreateUrlData {
   id: string;
-  shortUrl: string;
+  shortCode: string;
   originalUrl: string;
   expiresAt?: Date | null;
 }

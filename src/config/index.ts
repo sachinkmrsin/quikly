@@ -13,4 +13,9 @@ export const config = {
     max: 100,
   },
   NODE_ENV: "development",
+  APP: {
+    shortCodeLenght: 7,
+    domain: process.env.APP_DOMAIN || "https://localhost:5000",
+    maxBulkUrls: 100,
+  },
 };

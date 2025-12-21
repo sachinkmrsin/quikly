@@ -33,4 +33,21 @@ export class CacheService {
       logger.error("Cache DEL Error", { shortCode, error });
     }
   }
+
+  async setMany(
+    entries: Array<{ shortCode: string; originalUrl: string }>,
+  ): Promise<void> {
+    try {
+      const pipeline = redis.multi();
+
+      for (const { shortCode, originalUrl } of entries) {
+        const key = this.prefix + shortCode;
+        pipeline.setEx(key, this.ttl, originalUrl);
+      }
+
+      await pipeline.exec();
+    } catch (error) {
+      logger.error("Cache SET MANY error", { count: entries.length, error });
+    }
+  }
 }
