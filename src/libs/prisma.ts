@@ -1,8 +1,16 @@
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "@prisma/client/extension";
 import { config } from "../config";
 import "dotenv/config";
+import type { Context, Next } from "hono";
 const connectionString = `${process.env.DATABASE_URL}`;
-const adapter = new PrismaPg({ connectionString });
+const adapter = new PrismaNeon({ connectionString });
 const prisma = new PrismaClient({ adapter });
-export { prisma };
+
+export function withPrisma(c: Context, next: Next) {
+  if (!c.get("prisma")) {
+    c.set("prisma", prisma);
+  }
+  return next();
+}
+export default prisma;

@@ -12,7 +12,7 @@ export interface UrlResponse {
   shortUrl: string;
   shortCode: string;
   originalUrl: string;
-  expiredsAt: Date | null;
+  expiresAt: Date | null;
   createdAt: Date;
 }
 

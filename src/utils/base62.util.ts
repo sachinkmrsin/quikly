@@ -18,7 +18,7 @@ export class Base62Util {
   static decode(encoded: string): bigint {
     let num = 0n;
     for (let i = 0; i < encoded.length; i++) {
-      num = num * 62n + BigInt(CHARS.indexOf(encoded[i]));
+      num = num * 62n + BigInt(CHARS.indexOf(encoded[i]!));
     }
     return num;
   }

@@ -11,7 +11,7 @@ import { Validation } from "../utils/validation.util";
 import type { CacheService } from "./cache.service";
 import { Base62Util } from "../utils/base62.util";
 import { config } from "../config";
-import type { PaginatedResopnse } from "../types/common.types";
+import type { PaginatedResponse } from "../types/common.types";
 
 export class UrlService {
   constructor(
@@ -26,7 +26,7 @@ export class UrlService {
     }
     const id = randomUUIDv7();
     const shortCode =
-      dto.customeCode || Base62Util.toBase62(id, config.APP.shortCodeLenght);
+      dto.customeCode || Base62Util.toBase62(id, config.APP.shortCodeLength);
     if (dto.customeCode && !Validation.isValidShortCode(dto.customeCode)) {
       throw new Error("Invalid custom code format");
     }
@@ -46,7 +46,7 @@ export class UrlService {
         shortUrl: `${config.APP.domain}/${shortCode}`,
         shortCode: urlRecord.shortCode,
         originalUrl: urlRecord.originalUrl,
-        expiredsAt: urlRecord.expiresAt,
+        expiresAt: urlRecord.expiresAt,
         createdAt: urlRecord.createdAt,
       };
     } catch (error: any) {
@@ -70,7 +70,7 @@ export class UrlService {
 
     const records = validUrls.map((url) => {
       const id = randomUUIDv7();
-      const shortCode = Base62Util.toBase62(id, config.APP.shortCodeLenght);
+      const shortCode = Base62Util.toBase62(id, config.APP.shortCodeLength);
       return { id, shortCode, originalUrl: url };
     });
 
@@ -87,7 +87,7 @@ export class UrlService {
         shortUrl: `${config.APP.domain}/${r.shortCode}`,
         shortCode: r.shortCode,
         originalUrl: r.originalUrl,
-        expiredsAt: null,
+        expiresAt: null,
         createdAt: new Date(),
       })),
     };
@@ -109,6 +109,9 @@ export class UrlService {
     await this.urlRepository.incrementClickCount(shortCode);
 
     originalUrl = urlRecord.originalUrl;
+    if (!originalUrl) {
+      throw new Error("Url Record Not found");
+    }
     this.cacheService.set(shortCode, originalUrl);
     return originalUrl;
   }
@@ -128,7 +131,7 @@ export class UrlService {
   async listUrls(
     limit: number,
     offset: number,
-  ): Promise<PaginatedResopnse<UrlStatsResponse>> {
+  ): Promise<PaginatedResponse<UrlStatsResponse>> {
     const [urls, total] = await Promise.all([
       this.urlRepository.findMany({ limit, offset }),
       this.urlRepository.count(),

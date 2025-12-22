@@ -1,5 +1,5 @@
-import { prisma } from "../libs/prisma";
-import type { Url } from "../../generated/prisma/client";
+import prisma from "../libs/prisma";
+import type { Url } from "../../src/generated/prisma/client";
 export interface CreateUrlData {
   id: string;
   shortCode: string;
@@ -8,7 +8,7 @@ export interface CreateUrlData {
 }
 
 export interface UpdateUrlData {
-  clickCount?: { increament: number };
+  clickCount?: { increment: number };
   lastAccessedAt?: Date;
 }
 export class UrlRepository {

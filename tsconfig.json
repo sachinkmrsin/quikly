@@ -3,12 +3,12 @@
     // Environment setup & latest features
     "lib": ["ESNext"],
     "target": "ESNext",
-    "module": "Preserve",
+    "module": "ESNext",
     "moduleDetection": "force",
+    "esModuleInterop": true,
     "jsx": "react-jsx",
     "allowJs": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"]
@@ -31,7 +31,5 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
-  },
-  "includes": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  }
 }

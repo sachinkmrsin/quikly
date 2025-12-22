@@ -10,7 +10,7 @@ export interface PaginationParams {
   offset: number;
 }
 
-export interface PaginatedResopnse<T> {
+export interface PaginatedResponse<T> {
   data: T[];
   total: number;
   perPage: number;

@@ -12,8 +12,8 @@ const redisClientSingleton = () => {
     socket: {
       reconnectStrategy: (retries) => {
         if (retries > 10) {
-          logger.error("Redis max recoonection attemps reached");
-          return new Error("Max reconnection attemps reached");
+          logger.error("Redis max reconnection attempts reached");
+          return new Error("Max reconnection attempts reached");
         }
         return Math.min(retries * 50, 500);
       },
@@ -21,7 +21,7 @@ const redisClientSingleton = () => {
   });
   client.on("error", (err) => logger.error("Redis Client Error", err));
   client.on("connect", () => logger.info("Redis Client Connected"));
-  client.on("reconnecting", () => logger.warn("Redis Client Reconnecing"));
+  client.on("reconnecting", () => logger.warn("Redis Client Reconnecting"));
 
   return client;
 };

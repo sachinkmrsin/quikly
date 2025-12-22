@@ -3,7 +3,7 @@ import { logger as honoLogger } from "hono/logger";
 import { cors } from "hono/cors";
 import { timingMiddleware } from "./middlewares/timing.middleware";
 const app = new Hono();
-import { prisma } from "./libs/prisma";
+import prisma from "./libs/prisma";
 import { redis } from "./libs/redis";
 import { UrlRepository } from "./repositories/url.repository";
 import { UrlService } from "./services/url.service";
@@ -22,13 +22,14 @@ app.get("/health", async (c) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
     await redis.ping();
-    return c.json({
+    c.json({
       status: "healthy",
       timestamp: new Date().toISOString(),
-      database: "connectec",
+      database: "connected",
       redis: "connected",
       bun: Bun.version,
     });
+    return;
   } catch (error) {
     return c.json(
       {
@@ -57,7 +58,7 @@ async function start() {
 
     await prisma.$connect();
     logger.info("Database connnected");
-    logger.info(`Runnin on Bun ${Bun.version}`);
+    logger.info(`Running on Bun ${Bun.version}`);
     logger.info(`Server running on port ${config.PORT}`);
 
     Bun.serve({
