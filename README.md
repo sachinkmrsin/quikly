@@ -1,4 +1,4 @@
-# 🔗 URL Shortener - Production Grade
+# 🔗 Quikly - A Url Shortner
 
 A high-performance, scalable URL shortening service built with Bun, Hono.js, Prisma, Redis, and PostgreSQL (Neon). Features include real-time analytics, caching, and a clean architecture designed for production use.
 
