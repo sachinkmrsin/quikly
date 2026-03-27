@@ -17,18 +17,26 @@ import type * as Prisma from "./prismaNamespace.ts"
 
 const config: runtime.GetPrismaClientConfig = {
   "previewFeatures": [],
-  "clientVersion": "7.2.0",
-  "engineVersion": "0c8ef2ce45c83248ab3df073180d5eda9e8be7a3",
+  "clientVersion": "7.6.0",
+  "engineVersion": "75cbdc1eb7150937890ad5465d861175c6624711",
   "activeProvider": "postgresql",
   "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\n// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?\n// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init\n\ngenerator client {\n  provider = \"prisma-client\"\n  output   = \"../src/generated/prisma\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel Url {\n  id             String    @id @default(uuid())\n  shortCode      String    @unique @map(\"short_code\") @db.VarChar(10)\n  originalUrl    String    @map(\"original_url\") @db.Text\n  createdAt      DateTime  @default(now()) @map(\"created_at\")\n  expiresAt      DateTime  @map(\"expired_at\")\n  clickCount     Int       @default(0) @map(\"click_count\")\n  lastAccessedAt DateTime? @map(\"last_accessed_at\")\n\n  @@index([expiresAt])\n  @@index([shortCode])\n  @@index([createdAt])\n  @@map(\"urls\")\n}\n",
   "runtimeDataModel": {
     "models": {},
     "enums": {},
     "types": {}
+  },
+  "parameterizationSchema": {
+    "strings": [],
+    "graph": ""
   }
 }
 
 config.runtimeDataModel = JSON.parse("{\"models\":{\"Url\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"shortCode\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"short_code\"},{\"name\":\"originalUrl\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"original_url\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"expiresAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"expired_at\"},{\"name\":\"clickCount\",\"kind\":\"scalar\",\"type\":\"Int\",\"dbName\":\"click_count\"},{\"name\":\"lastAccessedAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"last_accessed_at\"}],\"dbName\":\"urls\"}},\"enums\":{},\"types\":{}}")
+config.parameterizationSchema = {
+  strings: JSON.parse("[\"where\",\"Url.findUnique\",\"Url.findUniqueOrThrow\",\"orderBy\",\"cursor\",\"Url.findFirst\",\"Url.findFirstOrThrow\",\"Url.findMany\",\"data\",\"Url.createOne\",\"Url.createMany\",\"Url.createManyAndReturn\",\"Url.updateOne\",\"Url.updateMany\",\"Url.updateManyAndReturn\",\"create\",\"update\",\"Url.upsertOne\",\"Url.deleteOne\",\"Url.deleteMany\",\"having\",\"_count\",\"_avg\",\"_sum\",\"_min\",\"_max\",\"Url.groupBy\",\"Url.aggregate\",\"AND\",\"OR\",\"NOT\",\"id\",\"shortCode\",\"originalUrl\",\"createdAt\",\"expiresAt\",\"clickCount\",\"lastAccessedAt\",\"equals\",\"in\",\"notIn\",\"lt\",\"lte\",\"gt\",\"gte\",\"not\",\"contains\",\"startsWith\",\"endsWith\",\"set\",\"increment\",\"decrement\",\"multiply\",\"divide\"]"),
+  graph: "NwsQChwAACkAMB0AAAQAEB4AACkAMB8BAAAAASABAAAAASEBACoAISJAACsAISNAACsAISQCACwAISVAAC0AIQEAAAABACABAAAAAQAgChwAACkAMB0AAAQAEB4AACkAMB8BACoAISABACoAISEBACoAISJAACsAISNAACsAISQCACwAISVAAC0AIQElAAAuACADAAAABAAgAwAABQAwBAAAAQAgAwAAAAQAIAMAAAUAMAQAAAEAIAMAAAAEACADAAAFADAEAAABACAHHwEAAAABIAEAAAABIQEAAAABIkAAAAABI0AAAAABJAIAAAABJUAAAAABAQgAAAkAIAcfAQAAAAEgAQAAAAEhAQAAAAEiQAAAAAEjQAAAAAEkAgAAAAElQAAAAAEBCAAACwAwAQgAAAsAMAcfAQA0ACEgAQA0ACEhAQA0ACEiQAA1ACEjQAA1ACEkAgA2ACElQAA3ACECAAAAAQAgCAAADgAgBx8BADQAISABADQAISEBADQAISJAADUAISNAADUAISQCADYAISVAADcAIQIAAAAEACAIAAAQACACAAAABAAgCAAAEAAgAwAAAAEAIA8AAAkAIBAAAA4AIAEAAAABACABAAAABAAgBhUAAC8AIBYAADAAIBcAADMAIBgAADIAIBkAADEAICUAAC4AIAocAAAaADAdAAAXABAeAAAaADAfAQAbACEgAQAbACEhAQAbACEiQAAcACEjQAAcACEkAgAdACElQAAeACEDAAAABAAgAwAAFgAwFAAAFwAgAwAAAAQAIAMAAAUAMAQAAAEAIAocAAAaADAdAAAXABAeAAAaADAfAQAbACEgAQAbACEhAQAbACEiQAAcACEjQAAcACEkAgAdACElQAAeACEOFQAAIwAgGAAAKAAgGQAAKAAgJgEAAAABJwEAAAAEKAEAAAAEKQEAAAABKgEAAAABKwEAAAABLAEAAAABLQEAJwAhLgEAAAABLwEAAAABMAEAAAABCxUAACMAIBgAACYAIBkAACYAICZAAAAAASdAAAAABChAAAAABClAAAAAASpAAAAAAStAAAAAASxAAAAAAS1AACUAIQ0VAAAjACAWAAAkACAXAAAjACAYAAAjACAZAAAjACAmAgAAAAEnAgAAAAQoAgAAAAQpAgAAAAEqAgAAAAErAgAAAAEsAgAAAAEtAgAiACELFQAAIAAgGAAAIQAgGQAAIQAgJkAAAAABJ0AAAAAFKEAAAAAFKUAAAAABKkAAAAABK0AAAAABLEAAAAABLUAAHwAhCxUAACAAIBgAACEAIBkAACEAICZAAAAAASdAAAAABShAAAAABSlAAAAAASpAAAAAAStAAAAAASxAAAAAAS1AAB8AIQgmAgAAAAEnAgAAAAUoAgAAAAUpAgAAAAEqAgAAAAErAgAAAAEsAgAAAAEtAgAgACEIJkAAAAABJ0AAAAAFKEAAAAAFKUAAAAABKkAAAAABK0AAAAABLEAAAAABLUAAIQAhDRUAACMAIBYAACQAIBcAACMAIBgAACMAIBkAACMAICYCAAAAAScCAAAABCgCAAAABCkCAAAAASoCAAAAASsCAAAAASwCAAAAAS0CACIAIQgmAgAAAAEnAgAAAAQoAgAAAAQpAgAAAAEqAgAAAAErAgAAAAEsAgAAAAEtAgAjACEIJggAAAABJwgAAAAEKAgAAAAEKQgAAAABKggAAAABKwgAAAABLAgAAAABLQgAJAAhCxUAACMAIBgAACYAIBkAACYAICZAAAAAASdAAAAABChAAAAABClAAAAAASpAAAAAAStAAAAAASxAAAAAAS1AACUAIQgmQAAAAAEnQAAAAAQoQAAAAAQpQAAAAAEqQAAAAAErQAAAAAEsQAAAAAEtQAAmACEOFQAAIwAgGAAAKAAgGQAAKAAgJgEAAAABJwEAAAAEKAEAAAAEKQEAAAABKgEAAAABKwEAAAABLAEAAAABLQEAJwAhLgEAAAABLwEAAAABMAEAAAABCyYBAAAAAScBAAAABCgBAAAABCkBAAAAASoBAAAAASsBAAAAASwBAAAAAS0BACgAIS4BAAAAAS8BAAAAATABAAAAAQocAAApADAdAAAEABAeAAApADAfAQAqACEgAQAqACEhAQAqACEiQAArACEjQAArACEkAgAsACElQAAtACELJgEAAAABJwEAAAAEKAEAAAAEKQEAAAABKgEAAAABKwEAAAABLAEAAAABLQEAKAAhLgEAAAABLwEAAAABMAEAAAABCCZAAAAAASdAAAAABChAAAAABClAAAAAASpAAAAAAStAAAAAASxAAAAAAS1AACYAIQgmAgAAAAEnAgAAAAQoAgAAAAQpAgAAAAEqAgAAAAErAgAAAAEsAgAAAAEtAgAjACEIJkAAAAABJ0AAAAAFKEAAAAAFKUAAAAABKkAAAAABK0AAAAABLEAAAAABLUAAIQAhAAAAAAAAATEBAAAAAQExQAAAAAEFMQIAAAABMgIAAAABMwIAAAABNAIAAAABNQIAAAABATFAAAAAAQAAAAAFFQAGFgAHFwAIGAAJGQAKAAAAAAAFFQAGFgAHFwAIGAAJGQAKAQIBAgMBBQYBBgcBBwgBCQoBCgwCCw0DDA8BDRECDhIEERMBEhQBExUCGhgFGxkL"
+}
 
 async function decodeBase64AsWasm(wasmBase64: string): Promise<WebAssembly.Module> {
   const { Buffer } = await import('node:buffer')
@@ -37,12 +45,14 @@ async function decodeBase64AsWasm(wasmBase64: string): Promise<WebAssembly.Modul
 }
 
 config.compilerWasm = {
-  getRuntime: async () => await import("@prisma/client/runtime/query_compiler_bg.postgresql.mjs"),
+  getRuntime: async () => await import("@prisma/client/runtime/query_compiler_fast_bg.postgresql.mjs"),
 
   getQueryCompilerWasmModule: async () => {
-    const { wasm } = await import("@prisma/client/runtime/query_compiler_bg.postgresql.wasm-base64.mjs")
+    const { wasm } = await import("@prisma/client/runtime/query_compiler_fast_bg.postgresql.wasm-base64.mjs")
     return await decodeBase64AsWasm(wasm)
-  }
+  },
+
+  importName: "./query_compiler_fast_bg.js"
 }
 
 
@@ -57,7 +67,9 @@ export interface PrismaClientConstructor {
    * Type-safe database client for TypeScript
    * @example
    * ```
-   * const prisma = new PrismaClient()
+   * const prisma = new PrismaClient({
+   *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
+   * })
    * // Fetch zero or more Urls
    * const urls = await prisma.url.findMany()
    * ```
@@ -79,7 +91,9 @@ export interface PrismaClientConstructor {
  * Type-safe database client for TypeScript
  * @example
  * ```
- * const prisma = new PrismaClient()
+ * const prisma = new PrismaClient({
+ *   adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL })
+ * })
  * // Fetch zero or more Urls
  * const urls = await prisma.url.findMany()
  * ```
@@ -164,7 +178,7 @@ export interface PrismaClient<
    * ])
    * ```
    * 
-   * Read more in our [docs](https://www.prisma.io/docs/concepts/components/prisma-client/transactions).
+   * Read more in our [docs](https://www.prisma.io/docs/orm/prisma-client/queries/transactions).
    */
   $transaction<P extends Prisma.PrismaPromise<any>[]>(arg: [...P], options?: { isolationLevel?: Prisma.TransactionIsolationLevel }): runtime.Types.Utils.JsPromise<runtime.Types.Utils.UnwrapTuple<P>>
 

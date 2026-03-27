@@ -206,7 +206,7 @@ export type UrlGroupByOutputType = {
   _max: UrlMaxAggregateOutputType | null
 }
 
-type GetUrlGroupByPayload<T extends UrlGroupByArgs> = Prisma.PrismaPromise<
+export type GetUrlGroupByPayload<T extends UrlGroupByArgs> = Prisma.PrismaPromise<
   Array<
     Prisma.PickEnumerable<UrlGroupByOutputType, T['by']> &
       {
@@ -1074,6 +1074,11 @@ export type UrlFindManyArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
    * Skip the first `n` Urls.
    */
   skip?: number
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+   * 
+   * Filter by unique combinations of Urls.
+   */
   distinct?: Prisma.UrlScalarFieldEnum | Prisma.UrlScalarFieldEnum[]
 }
 
