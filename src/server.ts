@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { logger as honoLogger } from "hono/logger";
 import { cors } from "hono/cors";
 import { timingMiddleware } from "./middlewares/timing.middleware";
+import { rateLimitMiddleware } from "./middlewares/rate-limit.middleware";
 const app = new Hono();
 import prisma from "./libs/prisma";
 import { redis } from "./libs/redis";
@@ -16,6 +17,7 @@ import { config } from "./config";
 const PORT = process.env.PORT || 5000;
 app.use("*", honoLogger());
 app.use("*", cors());
+app.use("*", rateLimitMiddleware);
 app.use("*", timingMiddleware);
 
 app.get("/health", async (c) => {
@@ -57,7 +59,7 @@ async function start() {
     logger.info("Redis Connect");
 
     await prisma.$connect();
-    logger.info("Database connnected");
+    logger.info("Database connected");
     logger.info(`Running on Bun ${Bun.version}`);
     logger.info(`Server running on port ${config.PORT}`);
 

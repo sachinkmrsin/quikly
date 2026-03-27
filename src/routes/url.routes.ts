@@ -1,9 +1,11 @@
 import { Hono } from "hono";
 import type { UrlController } from "../controllers/url.controller";
 import { validateContentType } from "../middlewares/validation.middleware";
+import {rateLimitMiddleware} from "@/middlewares/rate-limit.middleware.ts";
 
 export function createUrlRoutes(urlController: UrlController) {
   const routes = new Hono();
+  routes.use(rateLimitMiddleware);
   routes.post(
     "/shorten",
     validateContentType("application/json"),
