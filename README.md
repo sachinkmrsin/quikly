@@ -1,4 +1,4 @@
-# 🔗 Quikly - A Url Shortner
+# [~] Quikly - A Url Shortner
 
 A high-performance, scalable URL shortening service built with Bun, Hono.js, Prisma, Redis, and PostgreSQL (Neon). Features include real-time analytics, caching, and a clean architecture designed for production use.
 
@@ -8,22 +8,22 @@ A high-performance, scalable URL shortening service built with Bun, Hono.js, Pri
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/)
 
-## ✨ Features
+## [*] Features
 
-- 🚀 **Blazing Fast** - Built on Bun runtime (2-3x faster than Node.js)
-- 🔐 **Type-Safe** - Full TypeScript coverage with Prisma ORM
-- 📊 **Real-time Analytics** - Track clicks, devices, countries, and more
-- 💾 **Smart Caching** - Redis-powered caching (24-hour TTL)
-- 🎯 **Base62 Encoding** - Generate short, URL-safe codes from UUIDv7
-- ⚡ **High Performance** - Handles 15,000+ req/s with cache hits
-- 🏗️ **Production Architecture** - Clean separation of concerns (MVC pattern)
-- 🔄 **Bulk Operations** - Create multiple URLs in a single request
-- ⏰ **URL Expiration** - Set custom expiration times
-- 🎨 **Custom Short Codes** - Choose your own memorable codes
-- 🧹 **Auto Cleanup** - Maintenance endpoints for expired URLs
-- 🛡️ **Rate Limiting** - Per-IP token-bucket limiter backed by Redis
+- [>] **Blazing Fast** - Built on Bun runtime (2-3x faster than Node.js)
+- [#] **Type-Safe** - Full TypeScript coverage with Prisma ORM
+- [%] **Real-time Analytics** - Track clicks, devices, countries, and more
+- [S] **Smart Caching** - Redis-powered caching (24-hour TTL)
+- [+] **Base62 Encoding** - Generate short, URL-safe codes from UUIDv7
+- [!] **High Performance** - Handles 15,000+ req/s with cache hits
+- [^] **Production Architecture** - Clean separation of concerns (MVC pattern)
+- [~] **Bulk Operations** - Create multiple URLs in a single request
+- [T] **URL Expiration** - Set custom expiration times
+- [*] **Custom Short Codes** - Choose your own memorable codes
+- [x] **Auto Cleanup** - Maintenance endpoints for expired URLs
+- [#] **Rate Limiting** - Per-IP token-bucket limiter backed by Redis
 
-## 📊 Performance Metrics
+## [%] Performance Metrics
 
 | Metric                      | Value                              |
 | --------------------------- | ---------------------------------- |
@@ -34,7 +34,7 @@ A high-performance, scalable URL shortening service built with Bun, Hono.js, Pri
 | **Memory Usage**            | ~70-100MB base                     |
 | **Supported URLs**          | Billions (limited by storage)      |
 
-## 🏗️ Architecture
+## [^] Architecture
 
 ```
 src/
@@ -84,7 +84,7 @@ src/
 4. **Middleware** - Cross-cutting concerns (logging, errors, timing)
 5. **Utils** - Reusable helper functions
 
-## 🚀 Quick Start
+## [>] Quick Start
 
 ### Prerequisites
 
@@ -157,7 +157,7 @@ docker build --target tester -t quikly:test .
 > The image does **not** run migrations automatically. For production releases,
 > run `bun run prisma:deploy` as a separate step.
 
-## 🔧 Environment Variables
+## [~] Environment Variables
 
 Create a `.env` file in the root directory:
 
@@ -217,7 +217,7 @@ RATE_LIMIT_WINDOW_SEC=3600  # Redis key TTL in seconds (default: 3600 = 1 hour)
 
 ---
 
-## 🛡️ Rate Limiting
+## [#] Rate Limiting
 
 Quikly uses a **token-bucket algorithm** for rate limiting, implemented in
 `src/middlewares/rate-limit.middleware.ts`. It is applied globally to **every
@@ -293,7 +293,7 @@ The middleware checks headers in this order:
 - **Upstash**: Sign up at [upstash.com](https://upstash.com) (free tier available)
 - **Redis Cloud**: Sign up at [redis.com/cloud](https://redis.com/cloud)
 
-## 📡 API Documentation
+## [*] API Documentation
 
 ### Base URL
 
@@ -303,7 +303,7 @@ http://localhost:3000
 
 ### Endpoints
 
-#### 🏥 Health Check
+#### [+] Health Check
 
 ```http
 GET /health
@@ -323,7 +323,7 @@ GET /health
 
 ---
 
-#### 🔗 Create Short URL
+#### [~] Create Short URL
 
 ```http
 POST /shorten
@@ -359,7 +359,7 @@ Content-Type: application/json
 
 ---
 
-#### 📦 Bulk Create URLs
+#### [*] Bulk Create URLs
 
 ```http
 POST /shorten/bulk
@@ -393,7 +393,7 @@ Content-Type: application/json
 
 ---
 
-#### ↩️ Redirect to Original URL
+#### [<] Redirect to Original URL
 
 ```http
 GET /:shortCode
@@ -413,7 +413,7 @@ curl http://localhost:3000/abc1234
 
 ---
 
-#### 📊 Get URL Statistics
+#### [%] Get URL Statistics
 
 ```http
 GET /stats/:shortCode
@@ -435,7 +435,7 @@ GET /stats/:shortCode
 
 ---
 
-#### 🗑️ Delete URL
+#### [x] Delete URL
 
 ```http
 DELETE /:shortCode
@@ -455,7 +455,7 @@ DELETE /:shortCode
 
 ---
 
-#### 📋 List All URLs
+#### [=] List All URLs
 
 ```http
 GET /api/urls?limit=10&offset=0
@@ -488,7 +488,7 @@ GET /api/urls?limit=10&offset=0
 
 ---
 
-#### 🏆 Get Top URLs
+#### [^] Get Top URLs
 
 ```http
 GET /api/urls/top?limit=10
@@ -512,7 +512,7 @@ GET /api/urls/top?limit=10
 
 ---
 
-#### 🧹 Cleanup Expired URLs
+#### [x] Cleanup Expired URLs
 
 ```http
 POST /api/maintenance/cleanup
@@ -527,7 +527,7 @@ POST /api/maintenance/cleanup
 }
 ```
 
-## 🔍 How It Works
+## [?] How It Works
 
 ### URL Shortening Algorithm
 
@@ -556,7 +556,7 @@ Request Flow:
 5. Redirect user (301)
 ```
 
-## 🧪 Testing
+## [~] Testing
 
 Quikly ships with a **78-test unit suite** written for Bun's built-in test runner. All tests mock external dependencies (database, Redis) so they run fully offline — no live services needed.
 
@@ -639,7 +639,7 @@ curl -L http://localhost:3000/abc1234
 curl -X DELETE http://localhost:3000/abc1234
 ```
 
-## 🗄️ Database Schema
+## [D] Database Schema
 
 ### URLs Table
 
@@ -660,16 +660,16 @@ CREATE INDEX idx_created_at ON urls(created_at);
 CREATE INDEX idx_expires_at ON urls(expires_at);
 ```
 
-## 🔐 Security Best Practices
+## [#] Security Best Practices
 
 1. **URL Validation** - Strict URL format checking
 2. **Input Sanitization** - Clean all user inputs
-3. **Rate Limiting** - Per-IP token-bucket limiter backed by Redis (built-in — see [Rate Limiting](#️-rate-limiting))
+3. **Rate Limiting** - Per-IP token-bucket limiter backed by Redis (built-in — see [Rate Limiting](#-rate-limiting))
 4. **HTTPS Only** - Force secure connections in production
 5. **SQL Injection Prevention** - Prisma parameterized queries
 6. **XSS Protection** - Proper header configuration
 
-## 📈 Scaling Guide
+## [^] Scaling Guide
 
 ### Single Server (0-100 req/s)
 
@@ -729,7 +729,7 @@ const replicaUrl = process.env.DATABASE_REPLICA_URL;
 // Reduces write load by 90%
 ```
 
-## 🐛 Troubleshooting
+## [!] Troubleshooting
 
 ### Common Issues
 
@@ -771,7 +771,7 @@ DATABASE_URL="postgresql://user:pass@host/db?sslmode=require"
 bunx prisma db pull
 ```
 
-## 🛠️ Development Tools
+## [~] Development Tools
 
 ### Prisma Studio (Visual Database Editor)
 
@@ -813,7 +813,7 @@ bunx prisma migrate reset
 }
 ```
 
-## 📊 Monitoring & Observability
+## [%] Monitoring & Observability
 
 ### Key Metrics to Track
 
@@ -832,7 +832,7 @@ bunx prisma migrate reset
 - **Errors**: Sentry
 - **Uptime**: UptimeRobot or Pingdom
 
-## 🤝 Contributing
+## [+] Contributing
 
 Contributions are welcome! Please follow these steps:
 
@@ -842,11 +842,11 @@ Contributions are welcome! Please follow these steps:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 📝 License
+## [*] License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🙏 Acknowledgments
+## [*] Acknowledgments
 
 - [Bun](https://bun.sh) - Fast JavaScript runtime
 - [Hono.js](https://hono.dev) - Lightweight web framework
@@ -854,7 +854,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Neon](https://neon.tech) - Serverless PostgreSQL
 - [Redis](https://redis.io) - In-memory cache
 
-## 📧 Support
+## [@] Support
 
 For issues and questions:
 
@@ -862,7 +862,7 @@ For issues and questions:
 - Check existing documentation
 - Review API examples above
 
-## 🗺️ Roadmap
+## [>] Roadmap
 
 - [ ] User authentication & API keys
 - [ ] Custom domains support
@@ -877,4 +877,4 @@ For issues and questions:
 
 ---
 
-**Built with ❤️ using Bun, Hono, Prisma, and Redis**
+**Built with <3 using Bun, Hono, Prisma, and Redis**
