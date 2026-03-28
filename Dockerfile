@@ -14,7 +14,7 @@ COPY package.json bun.lock ./
 RUN --mount=type=cache,target=/root/.bun/install/cache \
     bun install --frozen-lockfile --ignore-scripts
 
-COPY tsconfig.json prisma.config.ts ./
+COPY tsconfig.json prisma.config.ts bunfig.toml ./
 COPY prisma ./prisma
 COPY src ./src
 
@@ -26,10 +26,18 @@ RUN test -f dist/server.js || \
     { echo "ERROR: dist/server.js not found — check build script --outdir"; exit 1; }
 
 
+# ── Tester ────────────────────────────────────────────────────────────────────
+FROM builder AS tester
+
+RUN bun test && touch /tmp/tests-passed
+
+
 # ── Runtime ───────────────────────────────────────────────────────────────────
 FROM base AS runtime
 
 ENV NODE_ENV=production
+
+COPY --from=tester /tmp/tests-passed /tmp/tests-passed
 
 # Bundled app + generated Prisma client (needed for runtime path lookups).
 COPY --from=builder /app/dist ./dist

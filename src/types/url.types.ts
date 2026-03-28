@@ -1,6 +1,6 @@
 export interface CreateUrlDto {
   url: string;
-  customeCode?: string;
+  customCode?: string;
   expiresIn?: number;
 }
 

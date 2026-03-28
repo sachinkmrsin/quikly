@@ -1,10 +1,9 @@
-import { Children } from "react";
 
 const CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 export class Base62Util {
   static toBase62(uuid: string, length: number = 7): string {
-    const hex = uuid.replace("/-/g", "").substring(0, 16);
+    const hex = uuid.replace(/-/g, "").substring(0, 16);
     let num = BigInt("0x" + hex);
     if (num === 0n) return "0".padStart(length, "0");
     let result = "";

@@ -26,8 +26,8 @@ export class UrlService {
     }
     const id = randomUUIDv7();
     const shortCode =
-      dto.customeCode || Base62Util.toBase62(id, config.APP.shortCodeLength);
-    if (dto.customeCode && !Validation.isValidShortCode(dto.customeCode)) {
+      dto.customCode || Base62Util.toBase62(id, config.APP.shortCodeLength);
+    if (dto.customCode && !Validation.isValidShortCode(dto.customCode)) {
       throw new Error("Invalid custom code format");
     }
 
@@ -51,7 +51,7 @@ export class UrlService {
       };
     } catch (error: any) {
       if (error.code === "P2002") {
-        throw new Error("Custome Code already exists");
+        throw new Error("Custom Code already exists");
       }
       throw error;
     }

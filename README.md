@@ -64,6 +64,15 @@ src/
 ├── libs/           # External service clients
 │   ├── prisma.ts
 │   └── redis.ts
+├── tests/          # Unit test suite (bun test)
+│   ├── setup.ts                       # Preloaded env-var bootstrap
+│   ├── controller/
+│   │   └── url.controller.test.ts     # Controller layer tests (22)
+│   ├── service/
+│   │   └── url.service.test.ts        # Service layer tests (28)
+│   └── utils/
+│       ├── base62.util.test.ts        # Base62 encoding tests (28)
+│       └── validation.util.test.ts    # Validation helper tests (39)
 └── server.ts       # Application entry point
 ```
 
@@ -118,7 +127,7 @@ bun src/server.ts
 ### Docker
 
 ```bash
-# Build the image
+# Build the image (type-checks, runs all 117 tests, then produces the runtime image)
 docker build -t quikly .
 
 # Run the container
@@ -129,6 +138,20 @@ docker run --rm \
   -e BASE_URL="http://localhost:3000" \
   -e REDIS_URL="redis://host:6379" \
   quikly
+```
+
+The build pipeline has three stages:
+
+| Stage | What it does |
+|---|---|
+| `builder` | Installs deps, generates Prisma client, type-checks, bundles to `dist/` |
+| `tester` | Inherits from `builder`, runs `bun test` — **build fails if any test fails** |
+| `runtime` | Copies only the production bundle; depends on `tester` via a sentinel file |
+
+To run only the tests inside Docker (e.g. in CI):
+
+```bash
+docker build --target tester -t quikly:test .
 ```
 
 > The image does **not** run migrations automatically. For production releases,
@@ -513,7 +536,60 @@ Request Flow:
 
 ## 🧪 Testing
 
-### Manual Testing with curl
+Quikly ships with a **78-test unit suite** written for Bun's built-in test runner. All tests mock external dependencies (database, Redis) so they run fully offline — no live services needed.
+
+### Running the tests
+
+```bash
+# Run the full suite once
+bun test
+
+# Watch mode — re-runs on every file save
+bun test:watch
+
+# With coverage report
+bun test:coverage
+```
+
+### Test structure
+
+| File | Layer | Tests | What's covered |
+|---|---|---|---|
+| `tests/controller/url.controller.test.ts` | Controller | 22 | HTTP status codes, response bodies, route params, query-param defaults — uses Hono's in-process `app.request()` instead of a real server |
+| `tests/service/url.service.test.ts` | Service | 28 | Business logic, cache hit/miss, pagination maths, Prisma error mapping, fire-and-forget click increment |
+| `tests/utils/base62.util.test.ts` | Utility | 28 | Encoding, decoding, charset validity, determinism, zero/padding edge cases, round-trip |
+
+### How controller tests work (no supertest)
+
+Hono exposes `app.request()` — a thin wrapper around `app.fetch()` that accepts a plain `Request` and returns a standard `Response`. No HTTP server, no port, no socket:
+
+```typescript
+const res = await app.request("/shorten", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ url: "https://example.com" }),
+});
+
+expect(res.status).toBe(201);
+const body = await res.json();
+expect(body.shortCode).toBeTruthy();
+```
+
+### Test setup
+
+`src/tests/setup.ts` is preloaded by `bunfig.toml` before any test file runs. It sets the env vars that `config/index.ts` requires (`DATABASE_URL`, `BASE_URL`, …) so the config module loads without error even though no real services are present.
+
+### Tests in the Docker build
+
+`bun test` is executed as a dedicated **tester** stage in the `Dockerfile`. The final runtime image has a hard dependency on that stage via a sentinel file — a failing test aborts the entire `docker build`.
+
+```
+builder  ──►  tester (bun test)  ──►  runtime
+                    │ fails here?
+                    └──► docker build exits non-zero
+```
+
+### Manual testing with curl
 
 ```bash
 # Create a short URL
@@ -688,6 +764,10 @@ bunx prisma migrate reset
     "dev": "bun --hot src/server.ts",
     "start": "bun src/server.ts",
     "build": "bun build src/server.ts --outdir ./dist --target bun",
+    "test": "bun test",
+    "test:watch": "bun test --watch",
+    "test:coverage": "bun test --coverage",
+    "typecheck": "tsc",
     "prisma:generate": "bunx prisma generate",
     "prisma:migrate": "bunx prisma migrate dev",
     "prisma:deploy": "bunx prisma migrate deploy",
