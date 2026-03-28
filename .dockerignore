@@ -1,0 +1,22 @@
+# Local dependencies / build output
+node_modules
+dist
+
+# Environment files should stay outside the image
+.env
+.env.*
+!.env.example
+
+# VCS / editor metadata
+.git
+.gitignore
+.idea
+.vscode
+
+# Logs / reports
+coverage
+*.log
+
+# OS-generated files
+.DS_Store
+

@@ -21,6 +21,7 @@ A high-performance, scalable URL shortening service built with Bun, Hono.js, Pri
 - ⏰ **URL Expiration** - Set custom expiration times
 - 🎨 **Custom Short Codes** - Choose your own memorable codes
 - 🧹 **Auto Cleanup** - Maintenance endpoints for expired URLs
+- 🛡️ **Rate Limiting** - Per-IP token-bucket limiter backed by Redis
 
 ## 📊 Performance Metrics
 
@@ -48,8 +49,9 @@ src/
 │   └── url.repository.ts
 ├── routes/            # API route definitions
 │   └── url.routes.ts
-├── middleware/        # Custom middleware
+├── middlewares/       # Custom middleware
 │   ├── error.middleware.ts
+│   ├── rate-limit.middleware.ts
 │   ├── timing.middleware.ts
 │   └── validation.middleware.ts
 ├── types/            # TypeScript type definitions
@@ -100,40 +102,159 @@ bunx prisma db push
 bunx prisma generate
 
 # Start development server
-bun --hot src/index.ts
+bun --hot src/server.ts
 ```
 
 ### Production Build
 
 ```bash
 # Build the application
-bun build src/index.ts --outdir ./dist --target bun
+bun build src/server.ts --outdir ./dist --target bun
 
 # Run production server
-bun dist/index.js
+bun src/server.ts
 ```
+
+### Docker
+
+```bash
+# Build the image
+docker build -t quikly .
+
+# Run the container
+docker run --rm \
+  -p 3000:3000 \
+  -e PORT=3000 \
+  -e DATABASE_URL="postgresql://user:password@host.neon.tech/database?sslmode=require" \
+  -e BASE_URL="http://localhost:3000" \
+  -e REDIS_URL="redis://host:6379" \
+  quikly
+```
+
+> The image does **not** run migrations automatically. For production releases,
+> run `bun run prisma:deploy` as a separate step.
 
 ## 🔧 Environment Variables
 
 Create a `.env` file in the root directory:
 
 ```bash
-# Database Configuration (Neon PostgreSQL)
+# ─────────────────────────────────────────────────────────────
+# Database (required)
+# Neon PostgreSQL pooled connection string
+# ─────────────────────────────────────────────────────────────
 DATABASE_URL="postgresql://user:password@host.neon.tech/database?sslmode=require"
 
-# Redis Configuration
+# ─────────────────────────────────────────────────────────────
+# Redis (required for caching & rate limiting)
+# ─────────────────────────────────────────────────────────────
 REDIS_URL="redis://localhost:6379"
-# For Redis Cloud: redis://default:password@host:port
+# REDIS_PASS=          # Optional — omit entirely for unauthenticated Redis
+                       # For Redis Cloud: set REDIS_URL to the full URL
+                       #   redis://default:password@host:port
+                       # and leave REDIS_PASS empty
 
-# Application Configuration
-PORT=3000
-NODE_ENV=development  # development | production
-APP_DOMAIN=http://localhost:3000  # Used for generating short URLs
+# ─────────────────────────────────────────────────────────────
+# Application (required)
+# ─────────────────────────────────────────────────────────────
+PORT=3000                          # Port the server binds to (default: 3000)
+NODE_ENV=development               # development | production
+BASE_URL=http://localhost:3000     # Public base URL — used to build short links
+                                   # e.g. https://quikly.io in production
 
-# Optional: Rate Limiting
-RATE_LIMIT_WINDOW_MS=900000  # 15 minutes
-RATE_LIMIT_MAX=100  # Max requests per window
+# ─────────────────────────────────────────────────────────────
+# Application (optional)
+# ─────────────────────────────────────────────────────────────
+APP_DOMAIN=http://localhost:3000   # Override the domain used in generated
+                                   # short URLs (defaults to BASE_URL)
+
+# ─────────────────────────────────────────────────────────────
+# Rate Limiting (optional — all have safe defaults)
+# Token-bucket algorithm, enforced per IP via Redis
+# ─────────────────────────────────────────────────────────────
+RATE_LIMIT_CAPACITY=100     # Max tokens per bucket / burst ceiling (default: 100)
+RATE_LIMIT_REFILL_RATE=10   # Tokens added per second (default: 10)
+RATE_LIMIT_WINDOW_SEC=3600  # Redis key TTL in seconds (default: 3600 = 1 hour)
 ```
+
+### Variable reference
+
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `DATABASE_URL` | ✅ | — | PostgreSQL connection string |
+| `REDIS_URL` | ✅ | `redis://localhost:6379` | Redis connection URL |
+| `REDIS_PASS` | ❌ | _(none)_ | Redis password — omit for unauthenticated instances |
+| `PORT` | ❌ | `3000` | HTTP port the server listens on |
+| `NODE_ENV` | ❌ | `development` | Runtime environment |
+| `BASE_URL` | ✅ | — | Public URL used to construct short links |
+| `APP_DOMAIN` | ❌ | `https://localhost:5000` | Domain override for generated URLs |
+| `RATE_LIMIT_CAPACITY` | ❌ | `100` | Token bucket capacity (burst ceiling) |
+| `RATE_LIMIT_REFILL_RATE` | ❌ | `10` | Tokens refilled per second |
+| `RATE_LIMIT_WINDOW_SEC` | ❌ | `3600` | Redis key TTL — effectively the tracking window |
+
+---
+
+## 🛡️ Rate Limiting
+
+Quikly uses a **token-bucket algorithm** for rate limiting, implemented in
+`src/middlewares/rate-limit.middleware.ts`. It is applied globally to **every
+request** via `app.use("*", rateLimitMiddleware)` in `src/server.ts`.
+
+### How it works
+
+```
+Bucket per IP  ─────────────────────────────────────────────────────
+                                                                     │
+  On first request:  bucket starts full (CAPACITY tokens)           │
+  On every request:  elapsed time × REFILL_RATE tokens are added    │
+                     (capped at CAPACITY)                            │
+                     then 1 token is consumed                        │
+  When empty (tokens < 1): request is rejected with 429             │
+─────────────────────────────────────────────────────────────────────
+```
+
+State (`tokens`, `lastRefill`) is stored in Redis as a Hash under the key
+`rate_limit:{ip}` with a TTL of `RATE_LIMIT_WINDOW_SEC` seconds.
+The middleware **fails open** — if Redis is unavailable, the request is allowed
+through so a Redis outage does not take down the API.
+
+### Response headers
+
+Every response includes these headers so clients can self-throttle:
+
+| Header | Description |
+|---|---|
+| `X-RateLimit-Limit` | Bucket capacity (= `RATE_LIMIT_CAPACITY`) |
+| `X-RateLimit-Remaining` | Tokens left after this request |
+| `X-RateLimit-Policy` | Full policy string e.g. `100;w=3600;burst=100;comment="token-bucket"` |
+| `Retry-After` | Seconds until at least 1 token is available _(only on 429)_ |
+
+### 429 response body
+
+```json
+{
+  "error": "Too Many Requests",
+  "message": "Rate limit exceeded. Try again in 6s.",
+  "retryAfter": 6
+}
+```
+
+### IP detection
+
+The middleware checks headers in this order:
+1. `X-Forwarded-For` (first IP in the chain — correct behind most proxies / load balancers)
+2. `X-Real-IP`
+3. Falls back to `"unknown"` (all unknown origins share a single bucket)
+
+### Tuning for production
+
+| Scenario | Suggested values |
+|---|---|
+| Public API | `CAPACITY=60`, `REFILL_RATE=1`, `WINDOW_SEC=60` |
+| Internal / trusted traffic | `CAPACITY=500`, `REFILL_RATE=50`, `WINDOW_SEC=60` |
+| Strict anti-abuse | `CAPACITY=20`, `REFILL_RATE=0.5`, `WINDOW_SEC=3600` |
+
+
 
 ### Getting Database & Redis URLs
 
@@ -185,8 +306,8 @@ Content-Type: application/json
 ```json
 {
   "url": "https://example.com/very/long/url",
-  "customCode": "mylink",  // Optional
-  "expiresIn": 86400       // Optional, in seconds
+  "customCode": "mylink",  
+  "expiresIn": 86400      
 }
 ```
 
@@ -233,8 +354,7 @@ Content-Type: application/json
       "originalUrl": "https://example.com/page1",
       "shortUrl": "http://localhost:3000/abc1234",
       "shortCode": "abc1234"
-    },
-    // ... more URLs
+    }
   ]
 }
 ```
@@ -445,24 +565,10 @@ CREATE INDEX idx_expires_at ON urls(expires_at);
 
 1. **URL Validation** - Strict URL format checking
 2. **Input Sanitization** - Clean all user inputs
-3. **Rate Limiting** - Prevent abuse (configurable)
+3. **Rate Limiting** - Per-IP token-bucket limiter backed by Redis (built-in — see [Rate Limiting](#️-rate-limiting))
 4. **HTTPS Only** - Force secure connections in production
 5. **SQL Injection Prevention** - Prisma parameterized queries
 6. **XSS Protection** - Proper header configuration
-
-### Recommended: Add Rate Limiting
-
-```typescript
-// middleware/rate-limit.middleware.ts
-import { rateLimiter } from 'hono-rate-limiter';
-
-export const limiter = rateLimiter({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 100, // Max 100 requests per window
-  standardHeaders: 'draft-6',
-  keyGenerator: (c) => c.req.header('x-forwarded-for') || 'anonymous'
-});
-```
 
 ## 📈 Scaling Guide
 
@@ -579,13 +685,13 @@ bunx prisma migrate reset
 ```json
 {
   "scripts": {
-    "dev": "bun --hot src/index.ts",
-    "start": "bun src/index.ts",
-    "build": "bun build src/index.ts --outdir ./dist --target bun",
-    "db:push": "bunx prisma db push",
-    "db:migrate": "bunx prisma migrate dev",
-    "db:studio": "bunx prisma studio",
-    "db:seed": "bun src/scripts/seed.ts"
+    "dev": "bun --hot src/server.ts",
+    "start": "bun src/server.ts",
+    "build": "bun build src/server.ts --outdir ./dist --target bun",
+    "prisma:generate": "bunx prisma generate",
+    "prisma:migrate": "bunx prisma migrate dev",
+    "prisma:deploy": "bunx prisma migrate deploy",
+    "prisma:studio": "bunx prisma studio"
   }
 }
 ```

@@ -14,7 +14,6 @@ import { createUrlRoutes } from "./routes/url.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 import { logger } from "./utils/logger.util";
 import { config } from "./config";
-const PORT = process.env.PORT || 5000;
 app.use("*", honoLogger());
 app.use("*", cors());
 app.use("*", rateLimitMiddleware);
@@ -64,6 +63,7 @@ async function start() {
     logger.info(`Server running on port ${config.PORT}`);
 
     Bun.serve({
+      hostname: "0.0.0.0",
       port: config.PORT,
       fetch: app.fetch,
     });

@@ -27,7 +27,7 @@ import "dotenv/config";
     DATABASE_URL: requireEnv("DATABASE_URL"), // required
     REDIS: {
       URL: process.env.REDIS_URL ?? "redis://localhost:6379",
-      PASS: process.env.REDIS_PASS ?? "password",
+      PASS: process.env.REDIS_PASS,
       TTL: 86400,
     },
     BASE_URL: requireEnv("BASE_URL"), // required

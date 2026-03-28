@@ -1,6 +1,6 @@
 import { createClient } from "redis";
 
-import { config } from "../config";
+import { config } from "@/config";
 import { logger } from "../utils/logger.util";
 
 export type RedisClient = ReturnType<typeof createClient>;
@@ -8,7 +8,7 @@ export type RedisClient = ReturnType<typeof createClient>;
 const redisClientSingleton = () => {
   const client = createClient({
     url: config.REDIS.URL,
-    password: config.REDIS.PASS,
+    ...(config.REDIS.PASS ? { password: config.REDIS.PASS } : {}),
     socket: {
       reconnectStrategy: (retries) => {
         if (retries > 10) {
