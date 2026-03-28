@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+# Run lint-staged (prettier + eslint on staged files)
+bunx lint-staged
+
+# Run the full test suite — commit is blocked on failure
+bun test

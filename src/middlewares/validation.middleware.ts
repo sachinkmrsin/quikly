@@ -5,6 +5,6 @@ export const validateContentType = (contentType: string) => {
     if (!reqContentType || !reqContentType.includes(contentType)) {
       return c.json({ error: `Content-Type must be ${contentType}` }, 415);
     }
-    next();
+    await next();
   };
 };

@@ -23,7 +23,7 @@ describe("Base62Util.toBase62", () => {
   });
 
   test("strips hyphens from the UUID before encoding", () => {
-    const withHyphens    = Base62Util.toBase62("550e8400-e29b-41d4-a716-446655440000");
+    const withHyphens = Base62Util.toBase62("550e8400-e29b-41d4-a716-446655440000");
     const withoutHyphens = Base62Util.toBase62("550e8400e29b41d4a716446655440000");
     expect(withHyphens).toBe(withoutHyphens);
   });
@@ -84,23 +84,23 @@ describe("Base62Util.decode", () => {
 // ── isValid ──────────────────────────────────────────────────────────────────
 describe("Base62Util.isValid", () => {
   test.each([
-    ["abc1234",    true],
-    ["ABC",        true],
-    ["0",          true],
-    ["zZ9",        true],
-    ["AAAAAAAAAA", true],  // all uppercase letters
-    ["0000000",    true],  // all zeros
+    ["abc1234", true],
+    ["ABC", true],
+    ["0", true],
+    ["zZ9", true],
+    ["AAAAAAAAAA", true], // all uppercase letters
+    ["0000000", true], // all zeros
   ])("returns true for valid base-62 string: %s", (code, expected) => {
     expect(Base62Util.isValid(code)).toBe(expected);
   });
 
   test.each([
-    ["",         false],   // empty
-    ["has-dash", false],   // hyphen
-    ["has_under",false],   // underscore
-    ["with space",false],  // space
-    ["emöji",    false],   // non-ASCII
-    ["!@#$",     false],   // special chars
+    ["", false], // empty
+    ["has-dash", false], // hyphen
+    ["has_under", false], // underscore
+    ["with space", false], // space
+    ["emöji", false], // non-ASCII
+    ["!@#$", false], // special chars
   ])("returns false for invalid base-62 string: %s", (code) => {
     expect(Base62Util.isValid(code)).toBe(false);
   });
@@ -120,5 +120,3 @@ describe("Base62Util round-trip (toBase62 → decode)", () => {
     expect(Base62Util.decode(encoded)).toBe(Base62Util.decode(encoded));
   });
 });
-
-

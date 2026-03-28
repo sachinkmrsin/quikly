@@ -25,15 +25,12 @@ export class UrlService {
       throw new Error("Invalid URL format");
     }
     const id = randomUUIDv7();
-    const shortCode =
-      dto.customCode || Base62Util.toBase62(id, config.APP.shortCodeLength);
+    const shortCode = dto.customCode || Base62Util.toBase62(id, config.APP.shortCodeLength);
     if (dto.customCode && !Validation.isValidShortCode(dto.customCode)) {
       throw new Error("Invalid custom code format");
     }
 
-    const expiresAt = dto.expiresIn
-      ? new Date(Date.now() + dto.expiresIn * 1000)
-      : null;
+    const expiresAt = dto.expiresIn ? new Date(Date.now() + dto.expiresIn * 1000) : null;
     try {
       const urlRecord = await this.urlRepository.create({
         id,
@@ -101,8 +98,7 @@ export class UrlService {
       });
       return originalUrl;
     }
-    const urlRecord =
-      await this.urlRepository.findByShortCodeNotExpired(shortCode);
+    const urlRecord = await this.urlRepository.findByShortCodeNotExpired(shortCode);
     if (!urlRecord) {
       throw new Error("URL not found or expired");
     }
@@ -112,7 +108,7 @@ export class UrlService {
     if (!originalUrl) {
       throw new Error("Url Record Not found");
     }
-    this.cacheService.set(shortCode, originalUrl);
+    await this.cacheService.set(shortCode, originalUrl);
     return originalUrl;
   }
 
@@ -128,10 +124,7 @@ export class UrlService {
     await this.urlRepository.delete(shortCode);
     await this.cacheService.delete(shortCode);
   }
-  async listUrls(
-    limit: number,
-    offset: number,
-  ): Promise<PaginatedResponse<UrlStatsResponse>> {
+  async listUrls(limit: number, offset: number): Promise<PaginatedResponse<UrlStatsResponse>> {
     const [urls, total] = await Promise.all([
       this.urlRepository.findMany({ limit, offset }),
       this.urlRepository.count(),

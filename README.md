@@ -25,14 +25,14 @@ A high-performance, scalable URL shortening service built with Bun, Hono.js, Pri
 
 ## 📊 Performance Metrics
 
-| Metric | Value |
-|--------|-------|
-| **Requests/sec (cached)** | 15,000 - 20,000 |
-| **Requests/sec (uncached)** | 2,000 - 3,000 |
-| **Response Time (P99)** | 3-5ms (cached), 20-50ms (uncached) |
-| **Cache Hit Rate** | 95%+ |
-| **Memory Usage** | ~70-100MB base |
-| **Supported URLs** | Billions (limited by storage) |
+| Metric                      | Value                              |
+| --------------------------- | ---------------------------------- |
+| **Requests/sec (cached)**   | 15,000 - 20,000                    |
+| **Requests/sec (uncached)** | 2,000 - 3,000                      |
+| **Response Time (P99)**     | 3-5ms (cached), 20-50ms (uncached) |
+| **Cache Hit Rate**          | 95%+                               |
+| **Memory Usage**            | ~70-100MB base                     |
+| **Supported URLs**          | Billions (limited by storage)      |
 
 ## 🏗️ Architecture
 
@@ -142,11 +142,11 @@ docker run --rm \
 
 The build pipeline has three stages:
 
-| Stage | What it does |
-|---|---|
-| `builder` | Installs deps, generates Prisma client, type-checks, bundles to `dist/` |
-| `tester` | Inherits from `builder`, runs `bun test` — **build fails if any test fails** |
-| `runtime` | Copies only the production bundle; depends on `tester` via a sentinel file |
+| Stage     | What it does                                                                 |
+| --------- | ---------------------------------------------------------------------------- |
+| `builder` | Installs deps, generates Prisma client, type-checks, bundles to `dist/`      |
+| `tester`  | Inherits from `builder`, runs `bun test` — **build fails if any test fails** |
+| `runtime` | Copies only the production bundle; depends on `tester` via a sentinel file   |
 
 To run only the tests inside Docker (e.g. in CI):
 
@@ -202,18 +202,18 @@ RATE_LIMIT_WINDOW_SEC=3600  # Redis key TTL in seconds (default: 3600 = 1 hour)
 
 ### Variable reference
 
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `DATABASE_URL` | ✅ | — | PostgreSQL connection string |
-| `REDIS_URL` | ✅ | `redis://localhost:6379` | Redis connection URL |
-| `REDIS_PASS` | ❌ | _(none)_ | Redis password — omit for unauthenticated instances |
-| `PORT` | ❌ | `3000` | HTTP port the server listens on |
-| `NODE_ENV` | ❌ | `development` | Runtime environment |
-| `BASE_URL` | ✅ | — | Public URL used to construct short links |
-| `APP_DOMAIN` | ❌ | `https://localhost:5000` | Domain override for generated URLs |
-| `RATE_LIMIT_CAPACITY` | ❌ | `100` | Token bucket capacity (burst ceiling) |
-| `RATE_LIMIT_REFILL_RATE` | ❌ | `10` | Tokens refilled per second |
-| `RATE_LIMIT_WINDOW_SEC` | ❌ | `3600` | Redis key TTL — effectively the tracking window |
+| Variable                 | Required | Default                  | Description                                         |
+| ------------------------ | -------- | ------------------------ | --------------------------------------------------- |
+| `DATABASE_URL`           | ✅       | —                        | PostgreSQL connection string                        |
+| `REDIS_URL`              | ✅       | `redis://localhost:6379` | Redis connection URL                                |
+| `REDIS_PASS`             | ❌       | _(none)_                 | Redis password — omit for unauthenticated instances |
+| `PORT`                   | ❌       | `3000`                   | HTTP port the server listens on                     |
+| `NODE_ENV`               | ❌       | `development`            | Runtime environment                                 |
+| `BASE_URL`               | ✅       | —                        | Public URL used to construct short links            |
+| `APP_DOMAIN`             | ❌       | `https://localhost:5000` | Domain override for generated URLs                  |
+| `RATE_LIMIT_CAPACITY`    | ❌       | `100`                    | Token bucket capacity (burst ceiling)               |
+| `RATE_LIMIT_REFILL_RATE` | ❌       | `10`                     | Tokens refilled per second                          |
+| `RATE_LIMIT_WINDOW_SEC`  | ❌       | `3600`                   | Redis key TTL — effectively the tracking window     |
 
 ---
 
@@ -245,12 +245,12 @@ through so a Redis outage does not take down the API.
 
 Every response includes these headers so clients can self-throttle:
 
-| Header | Description |
-|---|---|
-| `X-RateLimit-Limit` | Bucket capacity (= `RATE_LIMIT_CAPACITY`) |
-| `X-RateLimit-Remaining` | Tokens left after this request |
-| `X-RateLimit-Policy` | Full policy string e.g. `100;w=3600;burst=100;comment="token-bucket"` |
-| `Retry-After` | Seconds until at least 1 token is available _(only on 429)_ |
+| Header                  | Description                                                           |
+| ----------------------- | --------------------------------------------------------------------- |
+| `X-RateLimit-Limit`     | Bucket capacity (= `RATE_LIMIT_CAPACITY`)                             |
+| `X-RateLimit-Remaining` | Tokens left after this request                                        |
+| `X-RateLimit-Policy`    | Full policy string e.g. `100;w=3600;burst=100;comment="token-bucket"` |
+| `Retry-After`           | Seconds until at least 1 token is available _(only on 429)_           |
 
 ### 429 response body
 
@@ -265,29 +265,30 @@ Every response includes these headers so clients can self-throttle:
 ### IP detection
 
 The middleware checks headers in this order:
+
 1. `X-Forwarded-For` (first IP in the chain — correct behind most proxies / load balancers)
 2. `X-Real-IP`
 3. Falls back to `"unknown"` (all unknown origins share a single bucket)
 
 ### Tuning for production
 
-| Scenario | Suggested values |
-|---|---|
-| Public API | `CAPACITY=60`, `REFILL_RATE=1`, `WINDOW_SEC=60` |
-| Internal / trusted traffic | `CAPACITY=500`, `REFILL_RATE=50`, `WINDOW_SEC=60` |
-| Strict anti-abuse | `CAPACITY=20`, `REFILL_RATE=0.5`, `WINDOW_SEC=3600` |
-
-
+| Scenario                   | Suggested values                                    |
+| -------------------------- | --------------------------------------------------- |
+| Public API                 | `CAPACITY=60`, `REFILL_RATE=1`, `WINDOW_SEC=60`     |
+| Internal / trusted traffic | `CAPACITY=500`, `REFILL_RATE=50`, `WINDOW_SEC=60`   |
+| Strict anti-abuse          | `CAPACITY=20`, `REFILL_RATE=0.5`, `WINDOW_SEC=3600` |
 
 ### Getting Database & Redis URLs
 
 #### Neon (PostgreSQL)
+
 1. Sign up at [neon.tech](https://neon.tech)
 2. Create a new project
 3. Copy the connection string from the dashboard
 4. Use the pooled connection string for better performance
 
 #### Redis Options
+
 - **Local**: `redis://localhost:6379`
 - **Upstash**: Sign up at [upstash.com](https://upstash.com) (free tier available)
 - **Redis Cloud**: Sign up at [redis.com/cloud](https://redis.com/cloud)
@@ -295,6 +296,7 @@ The middleware checks headers in this order:
 ## 📡 API Documentation
 
 ### Base URL
+
 ```
 http://localhost:3000
 ```
@@ -302,11 +304,13 @@ http://localhost:3000
 ### Endpoints
 
 #### 🏥 Health Check
+
 ```http
 GET /health
 ```
 
 **Response:**
+
 ```json
 {
   "status": "healthy",
@@ -320,21 +324,24 @@ GET /health
 ---
 
 #### 🔗 Create Short URL
+
 ```http
 POST /shorten
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
   "url": "https://example.com/very/long/url",
-  "customCode": "mylink",  
-  "expiresIn": 86400      
+  "customCode": "mylink",
+  "expiresIn": 86400
 }
 ```
 
 **Response (201):**
+
 ```json
 {
   "shortUrl": "http://localhost:3000/abc1234",
@@ -346,29 +353,29 @@ Content-Type: application/json
 ```
 
 **Error Responses:**
+
 - `400` - Invalid URL format
 - `409` - Custom code already exists
 
 ---
 
 #### 📦 Bulk Create URLs
+
 ```http
 POST /shorten/bulk
 Content-Type: application/json
 ```
 
 **Request Body:**
+
 ```json
 {
-  "urls": [
-    "https://example.com/page1",
-    "https://example.com/page2",
-    "https://example.com/page3"
-  ]
+  "urls": ["https://example.com/page1", "https://example.com/page2", "https://example.com/page3"]
 }
 ```
 
 **Response (201):**
+
 ```json
 {
   "count": 3,
@@ -387,28 +394,33 @@ Content-Type: application/json
 ---
 
 #### ↩️ Redirect to Original URL
+
 ```http
 GET /:shortCode
 ```
 
 **Example:**
+
 ```bash
 curl http://localhost:3000/abc1234
 # Redirects to original URL with 301 status
 ```
 
 **Response:**
+
 - `301` - Permanent redirect to original URL
 - `404` - URL not found or expired
 
 ---
 
 #### 📊 Get URL Statistics
+
 ```http
 GET /stats/:shortCode
 ```
 
 **Response (200):**
+
 ```json
 {
   "id": "uuid-here",
@@ -424,11 +436,13 @@ GET /stats/:shortCode
 ---
 
 #### 🗑️ Delete URL
+
 ```http
 DELETE /:shortCode
 ```
 
 **Response (200):**
+
 ```json
 {
   "message": "URL deleted successfully",
@@ -442,15 +456,18 @@ DELETE /:shortCode
 ---
 
 #### 📋 List All URLs
+
 ```http
 GET /api/urls?limit=10&offset=0
 ```
 
 **Query Parameters:**
+
 - `limit` (default: 10) - Number of URLs per page
 - `offset` (default: 0) - Pagination offset
 
 **Response (200):**
+
 ```json
 {
   "data": [
@@ -472,11 +489,13 @@ GET /api/urls?limit=10&offset=0
 ---
 
 #### 🏆 Get Top URLs
+
 ```http
 GET /api/urls/top?limit=10
 ```
 
 **Response (200):**
+
 ```json
 {
   "urls": [
@@ -494,11 +513,13 @@ GET /api/urls/top?limit=10
 ---
 
 #### 🧹 Cleanup Expired URLs
+
 ```http
 POST /api/maintenance/cleanup
 ```
 
 **Response (200):**
+
 ```json
 {
   "message": "Cleanup completed",
@@ -517,6 +538,7 @@ POST /api/maintenance/cleanup
 5. **Return Short URL** - `domain/shortCode`
 
 ### Base62 Encoding
+
 - **Character Set**: `0-9A-Za-z` (62 characters)
 - **Length**: 7 characters = 62^7 = 3.5 trillion possible URLs
 - **Collision-free**: Uses UUIDv7 as source
@@ -553,11 +575,11 @@ bun test:coverage
 
 ### Test structure
 
-| File | Layer | Tests | What's covered |
-|---|---|---|---|
-| `tests/controller/url.controller.test.ts` | Controller | 22 | HTTP status codes, response bodies, route params, query-param defaults — uses Hono's in-process `app.request()` instead of a real server |
-| `tests/service/url.service.test.ts` | Service | 28 | Business logic, cache hit/miss, pagination maths, Prisma error mapping, fire-and-forget click increment |
-| `tests/utils/base62.util.test.ts` | Utility | 28 | Encoding, decoding, charset validity, determinism, zero/padding edge cases, round-trip |
+| File                                      | Layer      | Tests | What's covered                                                                                                                           |
+| ----------------------------------------- | ---------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `tests/controller/url.controller.test.ts` | Controller | 22    | HTTP status codes, response bodies, route params, query-param defaults — uses Hono's in-process `app.request()` instead of a real server |
+| `tests/service/url.service.test.ts`       | Service    | 28    | Business logic, cache hit/miss, pagination maths, Prisma error mapping, fire-and-forget click increment                                  |
+| `tests/utils/base62.util.test.ts`         | Utility    | 28    | Encoding, decoding, charset validity, determinism, zero/padding edge cases, round-trip                                                   |
 
 ### How controller tests work (no supertest)
 
@@ -620,6 +642,7 @@ curl -X DELETE http://localhost:3000/abc1234
 ## 🗄️ Database Schema
 
 ### URLs Table
+
 ```sql
 CREATE TABLE urls (
   id UUID PRIMARY KEY,
@@ -649,12 +672,14 @@ CREATE INDEX idx_expires_at ON urls(expires_at);
 ## 📈 Scaling Guide
 
 ### Single Server (0-100 req/s)
+
 - 1 app instance
 - 1 Redis instance
 - Neon free tier
 - **Capacity**: ~10M URLs, ~100 req/s
 
 ### Medium Scale (100-1,000 req/s)
+
 - 3-5 app instances (load balanced)
 - Redis cluster (3 nodes)
 - Neon Pro with read replicas
@@ -662,6 +687,7 @@ CREATE INDEX idx_expires_at ON urls(expires_at);
 - **Cost**: ~$500-1,000/month
 
 ### Large Scale (1,000-10,000 req/s)
+
 - 10-20 app instances
 - Redis cluster (6-12 nodes, sharded)
 - PostgreSQL with 2-3 read replicas
@@ -672,6 +698,7 @@ CREATE INDEX idx_expires_at ON urls(expires_at);
 ### Improvements for Scale
 
 #### 1. Add CDN (Cloudflare)
+
 ```typescript
 // Cache 301 redirects at edge
 // 90% of requests never hit your server
@@ -679,12 +706,14 @@ CREATE INDEX idx_expires_at ON urls(expires_at);
 ```
 
 #### 2. Connection Pooling
+
 ```bash
 # Use Neon's pooled connection
 DATABASE_URL="postgresql://user:pass@pooler.neon.tech/db?pgbouncer=true"
 ```
 
 #### 3. Database Read Replicas
+
 ```typescript
 // Read from replicas for analytics
 const replicaUrl = process.env.DATABASE_REPLICA_URL;
@@ -693,6 +722,7 @@ const replicaUrl = process.env.DATABASE_REPLICA_URL;
 ```
 
 #### 4. Batch Click Updates
+
 ```typescript
 // Buffer clicks in Redis
 // Flush to database every 10 seconds
@@ -704,17 +734,20 @@ const replicaUrl = process.env.DATABASE_REPLICA_URL;
 ### Common Issues
 
 #### Port Already in Use
+
 ```bash
 # Find and kill process using port 3000
 lsof -ti:3000 | xargs kill -9
 ```
 
 #### Prisma Client Not Generated
+
 ```bash
 bunx prisma generate
 ```
 
 #### Redis Connection Failed
+
 ```bash
 # Check if Redis is running
 redis-cli ping
@@ -728,6 +761,7 @@ sudo systemctl start redis
 ```
 
 #### Database Connection Error
+
 ```bash
 # Check connection string format
 # Should include ?sslmode=require for Neon
@@ -740,12 +774,14 @@ bunx prisma db pull
 ## 🛠️ Development Tools
 
 ### Prisma Studio (Visual Database Editor)
+
 ```bash
 bunx prisma studio
 # Opens http://localhost:5555
 ```
 
 ### Database Migrations
+
 ```bash
 # Create migration
 bunx prisma migrate dev --name add_user_table
@@ -758,6 +794,7 @@ bunx prisma migrate reset
 ```
 
 ### Useful Scripts
+
 ```json
 {
   "scripts": {
@@ -820,6 +857,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📧 Support
 
 For issues and questions:
+
 - Open an issue on GitHub
 - Check existing documentation
 - Review API examples above

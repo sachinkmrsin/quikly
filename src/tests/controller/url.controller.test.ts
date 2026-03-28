@@ -98,9 +98,7 @@ describe("UrlController", () => {
     });
 
     test("returns 409 when the service throws an 'already exists' error", async () => {
-      mockService.createShortUrl.mockRejectedValue(
-        new Error("Custom Code already exists"),
-      );
+      mockService.createShortUrl.mockRejectedValue(new Error("Custom Code already exists"));
 
       const res = await app.request("/shorten", {
         method: "POST",
@@ -109,14 +107,12 @@ describe("UrlController", () => {
       });
 
       expect(res.status).toBe(409);
-      const body = await res.json();
+      const body: any = await res.json();
       expect(body.error).toContain("already exists");
     });
 
     test("returns 400 when the service throws an 'Invalid' error", async () => {
-      mockService.createShortUrl.mockRejectedValue(
-        new Error("Invalid URL format"),
-      );
+      mockService.createShortUrl.mockRejectedValue(new Error("Invalid URL format"));
 
       const res = await app.request("/shorten", {
         method: "POST",
@@ -154,9 +150,7 @@ describe("UrlController", () => {
     });
 
     test("returns 400 when the service throws a 'Maximum' error", async () => {
-      mockService.createBulkUrls.mockRejectedValue(
-        new Error("Maximum 100 URLs per batch"),
-      );
+      mockService.createBulkUrls.mockRejectedValue(new Error("Maximum 100 URLs per batch"));
 
       const res = await app.request("/shorten/bulk", {
         method: "POST",
@@ -190,9 +184,7 @@ describe("UrlController", () => {
     });
 
     test("returns 404 when the service throws a 'not found' error", async () => {
-      mockService.getOriginalUrl.mockRejectedValue(
-        new Error("URL not found or expired"),
-      );
+      mockService.getOriginalUrl.mockRejectedValue(new Error("URL not found or expired"));
 
       const res = await app.request("/doesnotexist");
 
@@ -360,4 +352,3 @@ describe("UrlController", () => {
     });
   });
 });
-

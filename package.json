@@ -16,13 +16,31 @@
     "test:watch": "bun test --watch",
     "test:coverage": "bun test --coverage",
     "lint": "bunx eslint src/**/*.ts",
+    "lint:fix": "bunx eslint src/**/*.ts --fix",
+    "format": "bunx prettier --write .",
+    "format:check": "bunx prettier --check .",
+    "prepare": "husky",
     "postinstall": "prisma generate"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "bunx prettier --write",
+      "bunx eslint --fix"
+    ],
+    "*.{json,md}": [
+      "bunx prettier --write"
+    ]
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/pg": "^8.20.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.2",
+    "@typescript-eslint/parser": "^8.57.2",
     "bun-types": "^1.3.11",
     "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
     "prisma": "^7.6.0"
   },
   "peerDependencies": {

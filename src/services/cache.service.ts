@@ -19,7 +19,7 @@ export class CacheService {
   async set(shortCode: string, originalUrl: string): Promise<void> {
     try {
       const key = this.prefix + shortCode;
-      await redis.setEx(shortCode, this.ttl, originalUrl);
+      await redis.setEx(key, this.ttl, originalUrl);
     } catch (error) {
       logger.error(`Cache SET error`, { shortCode, error });
     }
@@ -34,9 +34,7 @@ export class CacheService {
     }
   }
 
-  async setMany(
-    entries: Array<{ shortCode: string; originalUrl: string }>,
-  ): Promise<void> {
+  async setMany(entries: Array<{ shortCode: string; originalUrl: string }>): Promise<void> {
     try {
       const pipeline = redis.multi();
 

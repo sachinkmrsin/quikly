@@ -73,9 +73,9 @@ describe("UrlService", () => {
     });
 
     test("throws 'Invalid URL format' for a non-URL string", async () => {
-      await expect(
-        urlService.createShortUrl({ url: "not-a-valid-url" }),
-      ).rejects.toThrow("Invalid URL format");
+      await expect(urlService.createShortUrl({ url: "not-a-valid-url" })).rejects.toThrow(
+        "Invalid URL format",
+      );
 
       expect(mockRepository.create).not.toHaveBeenCalled();
     });
@@ -166,9 +166,9 @@ describe("UrlService", () => {
     test("re-throws unknown repository errors", async () => {
       mockRepository.create.mockRejectedValue(new Error("Database down"));
 
-      await expect(
-        urlService.createShortUrl({ url: "https://example.com" }),
-      ).rejects.toThrow("Database down");
+      await expect(urlService.createShortUrl({ url: "https://example.com" })).rejects.toThrow(
+        "Database down",
+      );
     });
   });
 
@@ -203,14 +203,11 @@ describe("UrlService", () => {
     });
 
     test("throws when URL count exceeds maxBulkUrls (100)", async () => {
-      const tooMany = Array.from(
-        { length: 101 },
-        (_, i) => `https://example.com/${i}`,
-      );
+      const tooMany = Array.from({ length: 101 }, (_, i) => `https://example.com/${i}`);
 
-      await expect(
-        urlService.createBulkUrls({ urls: tooMany }),
-      ).rejects.toThrow("Maximum 100 URLs per batch");
+      await expect(urlService.createBulkUrls({ urls: tooMany })).rejects.toThrow(
+        "Maximum 100 URLs per batch",
+      );
     });
 
     test("throws when no valid URLs are in the batch", async () => {
@@ -265,9 +262,7 @@ describe("UrlService", () => {
       const result = await urlService.getOriginalUrl("abc1234");
 
       expect(result).toBe("https://example.com");
-      expect(mockRepository.findByShortCodeNotExpired).toHaveBeenCalledWith(
-        "abc1234",
-      );
+      expect(mockRepository.findByShortCodeNotExpired).toHaveBeenCalledWith("abc1234");
     });
 
     test("caches the URL retrieved from DB", async () => {
@@ -278,10 +273,7 @@ describe("UrlService", () => {
 
       await urlService.getOriginalUrl("abc1234");
 
-      expect(mockCacheService.set).toHaveBeenCalledWith(
-        "abc1234",
-        "https://example.com",
-      );
+      expect(mockCacheService.set).toHaveBeenCalledWith("abc1234", "https://example.com");
     });
 
     test("throws 'URL not found or expired' when not in cache or DB", async () => {
@@ -308,9 +300,7 @@ describe("UrlService", () => {
     test("throws 'URL not found' when short code doesn't exist", async () => {
       mockRepository.findByShortCode.mockResolvedValue(null);
 
-      await expect(urlService.getUrlStats("notexist")).rejects.toThrow(
-        "URL not found",
-      );
+      await expect(urlService.getUrlStats("notexist")).rejects.toThrow("URL not found");
     });
   });
 
@@ -392,5 +382,3 @@ describe("UrlService", () => {
     });
   });
 });
-
-

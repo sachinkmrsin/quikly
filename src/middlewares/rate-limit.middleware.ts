@@ -29,10 +29,7 @@ export const rateLimitMiddleware = async (c: Context, next: Next) => {
   const now = Date.now();
 
   try {
-    const [rawTokens, rawLastRefill] = await redis.hmGet(key, [
-      "tokens",
-      "lastRefill",
-    ]);
+    const [rawTokens, rawLastRefill] = await redis.hmGet(key, ["tokens", "lastRefill"]);
 
     let tokens: number;
     let lastRefill: number;
@@ -61,7 +58,6 @@ export const rateLimitMiddleware = async (c: Context, next: Next) => {
 
     //Check and consume one token
     if (tokens < 1) {
-
       const retryAfterSec = Math.ceil((1 - tokens) / REFILL_RATE);
       c.header("Retry-After", String(retryAfterSec));
       c.header("X-RateLimit-Remaining", "0");
@@ -96,4 +92,3 @@ export const rateLimitMiddleware = async (c: Context, next: Next) => {
     await next();
   }
 };
-

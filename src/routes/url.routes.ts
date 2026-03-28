@@ -4,11 +4,7 @@ import { validateContentType } from "../middlewares/validation.middleware";
 
 export function createUrlRoutes(urlController: UrlController) {
   const routes = new Hono();
-  routes.post(
-    "/shorten",
-    validateContentType("application/json"),
-    urlController.createShortUrl,
-  );
+  routes.post("/shorten", validateContentType("application/json"), urlController.createShortUrl);
 
   routes.post(
     "/shorten/bulk",

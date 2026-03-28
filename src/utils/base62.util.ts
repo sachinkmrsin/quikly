@@ -1,4 +1,3 @@
-
 const CHARS = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 export class Base62Util {
